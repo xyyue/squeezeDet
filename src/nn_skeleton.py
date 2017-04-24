@@ -319,7 +319,7 @@ class ModelSkeleton:
           self.num_objects,
           name='rotation_loss'
       )
-      tf.add_to_collection('losses', self.bbox_loss)
+      tf.add_to_collection('losses', self.rotation_loss)
         
 
     # add above losses as well as weight decay losses to form the total loss
