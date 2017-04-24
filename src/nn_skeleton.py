@@ -95,6 +95,8 @@ class ModelSkeleton:
     # Tensor used to represent labels
     self.labels = tf.placeholder(
         tf.float32, [mc.BATCH_SIZE, mc.ANCHORS, mc.CLASSES], name='labels')
+    self.rotations = tf.placeholder(
+        tf.float32, [mc.BATCH_SIZE, mc.ANCHORS, 1], name='rotations') ###
     # Tensor representing the IOU between predicted bbox and gt bbox
     self.ious = tf.Variable(
         initial_value=np.zeros((mc.BATCH_SIZE, mc.ANCHORS)), trainable=False,
@@ -148,10 +150,18 @@ class ModelSkeleton:
       )
 
       # bbox_delta
+      num_pred_box_delta = 4 * mc.ANCHOR_PER_GRID + num_confidence_scores ###
       self.pred_box_delta = tf.reshape(
-          preds[:, :, :, num_confidence_scores:],
+          preds[:, :, :, num_confidence_scores:num_pred_box_delta], ###
           [mc.BATCH_SIZE, mc.ANCHORS, 4],
           name='bbox_delta'
+      )
+
+      ### rotations
+      self.pred_rotations = tf.reshape(
+          preds[:, :, :, num_pred_box_delta:],
+          [mc.BATCH_SIZE, mc.ANCHORS, 1],
+          name='rotations'
       )
 
       # number of object. Used to normalize bbox and classification loss
@@ -300,6 +310,17 @@ class ModelSkeleton:
           name='bbox_loss'
       )
       tf.add_to_collection('losses', self.bbox_loss)
+
+    with tf.variable_scope('rotation_regression') as scope:
+      self.rotation_loss = tf.truediv(
+          tf.reduce_sum(
+              mc.LOSS_COEF_ROTATION * tf.square(
+                  self.input_mask * (self.rotations - self.pred_rotations))),
+          self.num_objects,
+          name='rotation_loss'
+      )
+      tf.add_to_collection('losses', self.bbox_loss)
+        
 
     # add above losses as well as weight decay losses to form the total loss
     self.loss = tf.add_n(tf.get_collection('losses'), name='total_loss')

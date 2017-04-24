@@ -79,6 +79,9 @@ def base_model_config(dataset='PASCAL_VOC'):
 
   # loss coefficient for bounding box regression
   cfg.LOSS_COEF_BBOX = 10.0
+
+  ### loss coefficient for rotation regression
+  cfg.LOSS_COEF_ROTATION = 10.0
                            
   # reduce step size after this many steps
   cfg.DECAY_STEPS = 10000

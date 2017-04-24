@@ -131,6 +131,7 @@ class imdb(object):
     bbox_per_batch  = []
     delta_per_batch = []
     aidx_per_batch  = []
+    rotation_per_batch = [] ###
     if mc.DEBUG_MODE:
       avg_ious = 0.
       num_objects = 0.
@@ -146,7 +147,10 @@ class imdb(object):
 
       # load annotations
       label_per_batch.append([b[4] for b in self._rois[idx][:]])
+      #each item in _rois is a list of bounding boxes with a class index
       gt_bbox = np.array([[b[0], b[1], b[2], b[3]] for b in self._rois[idx][:]])
+
+      rotation_per_batch.append([b[5] for b in self._rois[idx][:]]) ###
 
       if mc.DATA_AUGMENTATION:
         assert mc.DRIFT_X >= 0 and mc.DRIFT_Y > 0, \
@@ -194,9 +198,11 @@ class imdb(object):
 
       aidx_per_image, delta_per_image = [], []
       aidx_set = set()
+      # gt_bbox contas the bboxes of all the objects in a single image
       for i in range(len(gt_bbox)):
         overlaps = batch_iou(mc.ANCHOR_BOX, gt_bbox[i])
 
+        ### for each gt_box, get a closest anchor box
         aidx = len(mc.ANCHOR_BOX)
         for ov_idx in np.argsort(overlaps)[::-1]:
           if overlaps[ov_idx] <= 0:
@@ -232,7 +238,7 @@ class imdb(object):
         delta[2] = np.log(box_w/mc.ANCHOR_BOX[aidx][2])
         delta[3] = np.log(box_h/mc.ANCHOR_BOX[aidx][3])
 
-        aidx_per_image.append(aidx)
+        aidx_per_image.append(aidx) ### each gt_box gets an aidx in the end
         delta_per_image.append(delta)
 
       delta_per_batch.append(delta_per_image)
@@ -246,7 +252,7 @@ class imdb(object):
       print ('number of objects with 0 iou: {}'.format(num_zero_iou_obj))
 
     return image_per_batch, label_per_batch, delta_per_batch, \
-        aidx_per_batch, bbox_per_batch
+        aidx_per_batch, bbox_per_batch, rotation_per_batch
 
   def evaluate_detections(self):
     raise NotImplementedError

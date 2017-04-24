@@ -103,7 +103,7 @@ def train():
   assert FLAGS.dataset == 'KITTI', \
       'Currently only support KITTI dataset'
 
-  with tf.Graph().as_default():
+  with tf.Graph().as_default(): ### define operations and tensors in the graph
 
     assert FLAGS.net == 'vgg16' or FLAGS.net == 'resnet50' \
         or FLAGS.net == 'squeezeDet' or FLAGS.net == 'squeezeDet+', \
@@ -138,7 +138,7 @@ def train():
 
       count = 0
       f.write('\nActivation size by layer:\n')
-      for c in model.activation_counter:
+      for c in model.activation_counter:   ### the number of output of each layer
         f.write('\t{}: {}\n'.format(c[0], c[1]))
         count += c[1]
       f.write('\ttotal: {}\n'.format(count))
@@ -172,25 +172,28 @@ def train():
 
       # read batch input
       image_per_batch, label_per_batch, box_delta_per_batch, aidx_per_batch, \
-          bbox_per_batch = imdb.read_batch()
+          bbox_per_batch, rotation_per_batch = imdb.read_batch() ###
 
       label_indices, bbox_indices, box_delta_values, mask_indices, box_values, \
-          = [], [], [], [], []
+          rotation_values = [], [], [], [], [], [] ###
       aidx_set = set()
       num_discarded_labels = 0
       num_labels = 0
       for i in range(len(label_per_batch)): # batch_size
         for j in range(len(label_per_batch[i])): # number of annotations
           num_labels += 1
-          if (i, aidx_per_batch[i][j]) not in aidx_set:
+          if (i, aidx_per_batch[i][j]) not in aidx_set: ### if one annotation is
+                                                        ### already used for an image
             aidx_set.add((i, aidx_per_batch[i][j]))
             label_indices.append(
                 [i, aidx_per_batch[i][j], label_per_batch[i][j]])
+            # rotation_indices.append([i, aidx_per_batch[i][j])
             mask_indices.append([i, aidx_per_batch[i][j]])
             bbox_indices.extend(
                 [[i, aidx_per_batch[i][j], k] for k in range(4)])
             box_delta_values.extend(box_delta_per_batch[i][j])
-            box_values.extend(bbox_per_batch[i][j])
+            rotation_values.extend(rotation_per_batch[i][j]) ###
+            box_values.extend(bbox_per_batch[i][j]) ### gt bbox coordinates
           else:
             num_discarded_labels += 1
 
@@ -201,21 +204,26 @@ def train():
       feed_dict = {
           model.image_input: image_per_batch,
           model.keep_prob: mc.KEEP_PROB,
-          model.input_mask: np.reshape(
+          model.input_mask: np.reshape( ### whether each anchor is used for an img
               sparse_to_dense(
                   mask_indices, [mc.BATCH_SIZE, mc.ANCHORS],
                   [1.0]*len(mask_indices)),
               [mc.BATCH_SIZE, mc.ANCHORS, 1]),
-          model.box_delta_input: sparse_to_dense(
+          model.box_delta_input: sparse_to_dense( ###delta for a used anchor
               bbox_indices, [mc.BATCH_SIZE, mc.ANCHORS, 4],
               box_delta_values),
-          model.box_input: sparse_to_dense(
+          model.box_input: sparse_to_dense( ### gt bbox for a used anchor
               bbox_indices, [mc.BATCH_SIZE, mc.ANCHORS, 4],
               box_values),
-          model.labels: sparse_to_dense(
+          model.labels: sparse_to_dense( ### one-hot label for each used anchor
               label_indices,
               [mc.BATCH_SIZE, mc.ANCHORS, mc.CLASSES],
               [1.0]*len(label_indices)),
+          model.rotations: np.reshape(
+              sparse_to_dense(
+                  mask_indices, [mc.BATCH_SIZE, mc.ANCHORS],
+                  rotation_values),
+              [mc.BATCH_SIZE, mc.ANCHORS, 1])
       }
 
       if step % FLAGS.summary_step == 0:

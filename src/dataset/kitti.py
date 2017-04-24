@@ -22,9 +22,9 @@ class kitti(imdb):
 
     # a list of string indices of images in the directory
     self._image_idx = self._load_image_set_idx() 
-    # a dict of image_idx -> [[cx, cy, w, h, cls_idx]]. x,y,w,h are not divided by
+    # a dict of image_idx -> [[cx, cy, w, h, cls_idx, rotation]]. x,y,w,h are not divided by
     # the image width and height
-    self._rois = self._load_kitti_annotation()
+    self._rois = self._load_kitti_annotation() ### this is for all the images in the data set 
 
     ## batch reader ##
     self._perm_idx = None
@@ -83,6 +83,7 @@ class kitti(imdb):
         ymin = float(obj[5])
         xmax = float(obj[6])
         ymax = float(obj[7])
+        rotation_y = float(obj[14])     ###
         assert xmin >= 0.0 and xmin <= xmax, \
             'Invalid bounding box x-coord xmin {} or xmax {} at {}.txt' \
                 .format(xmin, xmax, index)
@@ -90,7 +91,7 @@ class kitti(imdb):
             'Invalid bounding box y-coord ymin {} or ymax {} at {}.txt' \
                 .format(ymin, ymax, index)
         x, y, w, h = bbox_transform_inv([xmin, ymin, xmax, ymax])
-        bboxes.append([x, y, w, h, cls])
+        bboxes.append([x, y, w, h, cls, rotation_y])   ###
 
       idx2annotation[index] = bboxes
 
