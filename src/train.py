@@ -192,7 +192,7 @@ def train():
             bbox_indices.extend(
                 [[i, aidx_per_batch[i][j], k] for k in range(4)])
             box_delta_values.extend(box_delta_per_batch[i][j])
-            rotation_values.extend(rotation_per_batch[i][j]) ###
+            rotation_values.append(rotation_per_batch[i][j]) ###
             box_values.extend(bbox_per_batch[i][j]) ### gt bbox coordinates
           else:
             num_discarded_labels += 1
@@ -230,10 +230,10 @@ def train():
         op_list = [
             model.train_op, model.loss, summary_op, model.det_boxes,
             model.det_probs, model.det_class, model.conf_loss,
-            model.bbox_loss, model.class_loss
+            model.bbox_loss, model.class_loss, model.rotation_loss
         ]
         _, loss_value, summary_str, det_boxes, det_probs, det_class, conf_loss, \
-            bbox_loss, class_loss = sess.run(op_list, feed_dict=feed_dict)
+            bbox_loss, class_loss, rotation_loss = sess.run(op_list, feed_dict=feed_dict)
 
         _viz_prediction_result(
             model, image_per_batch, bbox_per_batch, label_per_batch, det_boxes,
@@ -254,12 +254,12 @@ def train():
         for sum_str in counter_summary_str:
           summary_writer.add_summary(sum_str, step)
 
-        print ('conf_loss: {}, bbox_loss: {}, class_loss: {}'.
-            format(conf_loss, bbox_loss, class_loss))
+        print ('conf_loss: {}, bbox_loss: {}, class_loss: {}, rotation_loss: {}'.
+            format(conf_loss, bbox_loss, class_loss, rotation_loss))
       else:
-        _, loss_value, conf_loss, bbox_loss, class_loss = sess.run(
+        _, loss_value, conf_loss, bbox_loss, class_loss, rotation_loss = sess.run(
             [model.train_op, model.loss, model.conf_loss, model.bbox_loss,
-             model.class_loss], feed_dict=feed_dict)
+             model.class_loss, model.rotation_loss], feed_dict=feed_dict)
 
       duration = time.time() - start_time
 
