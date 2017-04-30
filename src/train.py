@@ -40,7 +40,7 @@ tf.app.flags.DEFINE_string('net', 'squeezeDet',
                            """Neural net architecture. """)
 tf.app.flags.DEFINE_string('pretrained_model_path', '',
                            """Path to the pretrained model.""")
-tf.app.flags.DEFINE_integer('summary_step', 10,
+tf.app.flags.DEFINE_integer('summary_step', 3,
                             """Number of steps to save summary.""")
 tf.app.flags.DEFINE_integer('checkpoint_step', 1000,
                             """Number of steps to save summary.""")

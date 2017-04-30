@@ -314,7 +314,7 @@ class ModelSkeleton:
     with tf.variable_scope('rotation_regression') as scope:
       self.rotation_loss = tf.truediv(
           tf.reduce_sum(
-              mc.LOSS_COEF_ROTATION * self.input_mask * (1 - tf.cos(self.rotations - self.pred_rotations)) / 2,
+              mc.LOSS_COEF_ROTATION * self.input_mask * (1 - tf.cos(self.rotations - self.pred_rotations)) / 2),
           self.num_objects,
           name='rotation_loss'
       )
