@@ -269,6 +269,14 @@ class ModelSkeleton:
 
       self.det_probs = tf.reduce_max(probs, 2, name='score')
       self.det_class = tf.argmax(probs, 2, name='class_idx')
+      #### rotation added
+      self.det_rotation = self.pred_rotations #stf.argmax(probs, 2, name='class_idx')
+
+      ##self.pred_rotations = tf.reshape(
+      ##    preds[:, :, :, num_pred_box_delta:],
+      ##    [mc.BATCH_SIZE, mc.ANCHORS, 1],
+      ##    name='rotations'
+      ##)
 
   def _add_loss_graph(self):
     """Define the loss operation."""
@@ -698,7 +706,7 @@ class ModelSkeleton:
 
       return outputs
 
-  def filter_prediction(self, boxes, probs, cls_idx):
+  def filter_prediction(self, boxes, probs, cls_idx, rotations):
     """Filter bounding box predictions with probability threshold and
     non-maximum supression.
 
@@ -727,6 +735,7 @@ class ModelSkeleton:
     final_boxes = []
     final_probs = []
     final_cls_idx = []
+    final_rotation = []
 
     for c in range(mc.CLASSES):
       idx_per_class = [i for i in range(len(probs)) if cls_idx[i] == c]
@@ -736,7 +745,8 @@ class ModelSkeleton:
           final_boxes.append(boxes[idx_per_class[i]])
           final_probs.append(probs[idx_per_class[i]])
           final_cls_idx.append(c)
-    return final_boxes, final_probs, final_cls_idx
+          final_rotation.append(rotations[idx_per_class[i]]) ###
+    return final_boxes, final_probs, final_cls_idx, final_rotation
 
   def _activation_summary(self, x, layer_name):
     """Helper to create summaries for activations.

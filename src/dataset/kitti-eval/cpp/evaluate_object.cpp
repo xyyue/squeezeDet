@@ -106,6 +106,8 @@ vector<tDetection> loadDetections(string file_name, bool &compute_aos, bool &eva
 
   // holds all detections (ignored detections are indicated by an index vector
   vector<tDetection> detections;
+  std::cout << "=================================" << std::endl;
+  std::cout << file_name.c_str() << std::endl;
   FILE *fp = fopen(file_name.c_str(),"r");
   if (!fp) {
     success = false;

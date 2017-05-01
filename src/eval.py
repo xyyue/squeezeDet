@@ -64,14 +64,14 @@ def eval_once(saver, ckpt_path, summary_writer, imdb, model):
     _t = {'im_detect': Timer(), 'im_read': Timer(), 'misc': Timer()}
 
     num_detection = 0.0
-    for i in xrange(num_images):
+    for i in xrange(num_images - 3500): ###
       _t['im_read'].tic()
       images, scales = imdb.read_image_batch(shuffle=False)
       _t['im_read'].toc()
 
       _t['im_detect'].tic()
-      det_boxes, det_probs, det_class = sess.run(
-          [model.det_boxes, model.det_probs, model.det_class],
+      det_boxes, det_probs, det_class, det_rotation = sess.run(
+          [model.det_boxes, model.det_probs, model.det_class, model.det_rotation],
           feed_dict={model.image_input:images, model.keep_prob: 1.0})
       _t['im_detect'].toc()
 
@@ -81,12 +81,13 @@ def eval_once(saver, ckpt_path, summary_writer, imdb, model):
         det_boxes[j, :, 0::2] /= scales[j][0]
         det_boxes[j, :, 1::2] /= scales[j][1]
 
-        det_bbox, score, det_class = model.filter_prediction(
-            det_boxes[j], det_probs[j], det_class[j])
+        det_bbox, score, det_class_, det_rotation_ = model.filter_prediction(
+            det_boxes[j], det_probs[j], det_class[j], det_rotation[j])
 
         num_detection += len(det_bbox)
-        for c, b, s in zip(det_class, det_bbox, score):
-          all_boxes[c][i].append(bbox_transform(b) + [s])
+        for c, b, s, r in zip(det_class_, det_bbox, score, det_rotation_
+):
+          all_boxes[c][i].append(bbox_transform(b) + [s] + [r])
       _t['misc'].toc()
 
       print ('im_detect: {:d}/{:d} im_read: {:.3f}s '

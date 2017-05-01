@@ -41,7 +41,7 @@ then
   --train_dir=/tmp/bichen/logs/SqueezeDet/train \
   --net=squeezeDet \
   --summary_step=100 \
-  --checkpoint_step=500 \
+  --checkpoint_step=50 \
   --gpu=$USE_GPU
 fi
 

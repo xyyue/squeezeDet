@@ -102,8 +102,8 @@ class kitti(imdb):
     Args:
       eval_dir: directory to write evaluation logs
       global_step: step of the checkpoint
-      all_boxes: all_boxes[cls][image] = N x 5 arrays of 
-        [xmin, ymin, xmax, ymax, score]
+      all_boxes: all_boxes[cls][image] = N x 6 arrays of 
+        [xmin, ymin, xmax, ymax, score, rotation]
     Returns:
       aps: array of average precisions.
       names: class names corresponding to each ap
@@ -120,9 +120,9 @@ class kitti(imdb):
           dets = all_boxes[cls_idx][im_idx]
           for k in xrange(len(dets)):
             f.write(
-                '{:s} -1 -1 0.0 {:.2f} {:.2f} {:.2f} {:.2f} 0.0 0.0 0.0 0.0 0.0 '
+                '{:s} -1 -1 {:s} {:.2f} {:.2f} {:.2f} {:.2f} 0.0 0.0 0.0 0.0 0.0 '
                 '0.0 0.0 {:.3f}\n'.format(
-                    cls.lower(), dets[k][0], dets[k][1], dets[k][2], dets[k][3],
+                    cls.lower(), dets[k][5], dets[k][0], dets[k][1], dets[k][2], dets[k][3],
                     dets[k][4])
             )
 
