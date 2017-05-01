@@ -745,7 +745,7 @@ class ModelSkeleton:
           final_boxes.append(boxes[idx_per_class[i]])
           final_probs.append(probs[idx_per_class[i]])
           final_cls_idx.append(c)
-          final_rotation.append(rotations[idx_per_class[i]]) ###
+          final_rotation.append(rotations[idx_per_class[i]][0]) ###
     return final_boxes, final_probs, final_cls_idx, final_rotation
 
   def _activation_summary(self, x, layer_name):

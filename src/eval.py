@@ -64,7 +64,7 @@ def eval_once(saver, ckpt_path, summary_writer, imdb, model):
     _t = {'im_detect': Timer(), 'im_read': Timer(), 'misc': Timer()}
 
     num_detection = 0.0
-    for i in xrange(num_images - 3500): ###
+    for i in xrange(num_images - 3600): ###
       _t['im_read'].tic()
       images, scales = imdb.read_image_batch(shuffle=False)
       _t['im_read'].toc()
@@ -85,8 +85,8 @@ def eval_once(saver, ckpt_path, summary_writer, imdb, model):
             det_boxes[j], det_probs[j], det_class[j], det_rotation[j])
 
         num_detection += len(det_bbox)
-        for c, b, s, r in zip(det_class_, det_bbox, score, det_rotation_
-):
+        for c, b, s, r in zip(det_class_, det_bbox, score, det_rotation_):
+          print("r is : ", r)
           all_boxes[c][i].append(bbox_transform(b) + [s] + [r])
       _t['misc'].toc()
 

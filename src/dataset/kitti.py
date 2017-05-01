@@ -120,7 +120,7 @@ class kitti(imdb):
           dets = all_boxes[cls_idx][im_idx]
           for k in xrange(len(dets)):
             f.write(
-                '{:s} -1 -1 {:s} {:.2f} {:.2f} {:.2f} {:.2f} 0.0 0.0 0.0 0.0 0.0 '
+                '{:s} -1 -1 {:.2f} {:.2f} {:.2f} {:.2f} {:.2f} 0.0 0.0 0.0 0.0 0.0 '
                 '0.0 0.0 {:.3f}\n'.format(
                     cls.lower(), dets[k][5], dets[k][0], dets[k][1], dets[k][2], dets[k][3],
                     dets[k][4])
@@ -202,6 +202,10 @@ class kitti(imdb):
       for line in lines:
         obj = line.strip().split(' ')
         cls = self._class_to_idx[obj[0].lower().strip()]
+	print("line is : ", line)
+	print("filename is : ", det_file_name)
+	print(obj[4])
+	print("type is: ", type(obj[4]))
         xmin = float(obj[4])
         ymin = float(obj[5])
         xmax = float(obj[6])
