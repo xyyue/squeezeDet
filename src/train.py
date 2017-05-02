@@ -71,7 +71,7 @@ def _draw_box(im, box_list, label_list, color=(0,255,0), cdict=None, form='cente
     cv2.putText(im, label, (xmin, ymax), font, 0.3, c, 1)
 
 def _viz_prediction_result(model, images, bboxes, labels, batch_det_bbox,
-                           batch_det_class, batch_det_prob):
+                           batch_det_class, batch_det_prob, batch_det_rotation):
   mc = model.mc
 
   for i in range(len(images)):
@@ -82,11 +82,11 @@ def _viz_prediction_result(model, images, bboxes, labels, batch_det_bbox,
         (0, 255, 0))
 
     # draw prediction
-    det_bbox, det_prob, det_class = model.filter_prediction(
-        batch_det_bbox[i], batch_det_prob[i], batch_det_class[i])
+    det_bbox, det_prob, det_class, det_rotation = model.filter_prediction(   ######
+        batch_det_bbox[i], batch_det_prob[i], batch_det_class[i], batch_det_rotation[i])
 
     keep_idx    = [idx for idx in range(len(det_prob)) \
-                      if det_prob[idx] > mc.PLOT_PROB_THRESH]
+                      if det_prob[idx] > mc.PLOT_PROB_THRESH]#TODO
     det_bbox    = [det_bbox[idx] for idx in keep_idx]
     det_prob    = [det_prob[idx] for idx in keep_idx]
     det_class   = [det_class[idx] for idx in keep_idx]
@@ -229,15 +229,15 @@ def train():
       if step % FLAGS.summary_step == 0:
         op_list = [
             model.train_op, model.loss, summary_op, model.det_boxes,
-            model.det_probs, model.det_class, model.conf_loss,
+            model.det_probs, model.det_rotation, model.det_class, model.conf_loss,
             model.bbox_loss, model.class_loss, model.rotation_loss
         ]
-        _, loss_value, summary_str, det_boxes, det_probs, det_class, conf_loss, \
+        _, loss_value, summary_str, det_boxes, det_probs, det_rotation, det_class, conf_loss, \
             bbox_loss, class_loss, rotation_loss = sess.run(op_list, feed_dict=feed_dict)
 
         _viz_prediction_result(
             model, image_per_batch, bbox_per_batch, label_per_batch, det_boxes,
-            det_class, det_probs)
+            det_class, det_probs, det_rotation)
         image_per_batch = bgr_to_rgb(image_per_batch)
         viz_summary = sess.run(
             model.viz_op, feed_dict={model.image_to_show: image_per_batch})
