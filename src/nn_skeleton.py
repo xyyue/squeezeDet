@@ -158,11 +158,25 @@ class ModelSkeleton:
       )
 
       ### rotations
-      self.pred_rotations = tf.reshape(
-          preds[:, :, :, num_pred_box_delta:],
-          [mc.BATCH_SIZE, mc.ANCHORS, 1],
+      self.pred_rotations = tf.subtract(
+          tf.multiply(
+              tf.sigmoid(
+                  tf.reshape(
+                      preds[:, :, :, num_pred_box_delta:],
+                      [mc.BATCH_SIZE, mc.ANCHORS, 1],
+                  )
+              ),
+              2 * np.pi
+          ),
+          np.pi,
           name='rotations'
       )
+
+      #self.pred_rotations = tf.reshape(
+      #    preds[:, :, :, num_pred_box_delta:],
+      #    [mc.BATCH_SIZE, mc.ANCHORS, 1],
+      #    name='rotations'
+      #)
 
       # number of object. Used to normalize bbox and classification loss
       self.num_objects = tf.reduce_sum(self.input_mask, name='num_objects')
