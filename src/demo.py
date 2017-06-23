@@ -185,37 +185,37 @@ def image_demo():
         print("BEFORE!!!")
         final_boxes, final_probs, final_class, final_order = model.filter_prediction(
             det_boxes[0], det_probs[0], det_class[0])
-        #print("AFTER!!!")
-        #print("the order is: ", final_order)
-        #print("final_probs is: ", final_probs)
-        #final_index = final_order[np.argmax(final_probs)]
-        #print("the index of max_prob is: ", final_order[np.argmax(final_probs)])
-        #
-        #print("the other one is: ", det_probs[0][final_order])
-        #
-        ## to compute iou, we need [cx, cy, width, height]
-        #file_name = os.path.split(f)[1]
-        #temp_dir  = os.path.split(f)[0]
-        #print("temp_dir is: ", temp_dir)
-        #label_file_name = os.path.join(temp_dir.replace('pics', 'labels'), file_name.replace('.png', '.txt'))
-        #with open(label_file_name) as fl:
-        #    line = fl.readline().strip().split(',')
-        #    # left, top, right, bottom
-        #    n0 = int(line[0])
-        #    n1 = int(line[1])
-        #    n2 = int(line[2])
-        #    n3 = int(line[3])
-        #gt_box = [(n0 + n2) / 2, (n1 + n3) / 2, abs(n2 - n0), abs(n1 - n3)]    
-        #print('gt_box is: ', gt_box)
-        #
-        #print("========================================")
-        #print("the iou is: ", util.iou(gt_box, det_boxes[0][final_index]))
-        #print('The det_class is: ', det_class[0][final_index])
-        #print('The det_pred_conf is: ', det_pred_conf[0][final_index])
-        #print('The det_pred_class_probs is: ', det_pred_class_probs[0][final_index])
-        #print('the det_prob is: ', det_probs[0][final_index])
-        #print('the predicted box is: ', det_boxes[0][final_index])
-        #print("========================================")
+        print("AFTER!!!")
+        print("the order is: ", final_order)
+        print("final_probs is: ", final_probs)
+        final_index = final_order[np.argmax(final_probs)]
+        print("the index of max_prob is: ", final_order[np.argmax(final_probs)])
+        
+        print("the other one is: ", det_probs[0][final_order])
+        
+        # to compute iou, we need [cx, cy, width, height]
+        file_name = os.path.split(f)[1]
+        temp_dir  = os.path.split(f)[0]
+        print("temp_dir is: ", temp_dir)
+        label_file_name = os.path.join(temp_dir.replace('pics', 'labels'), file_name.replace('.png', '.txt'))
+        with open(label_file_name) as fl:
+            line = fl.readline().strip().split(',')
+            # left, top, right, bottom
+            n0 = int(line[0])
+            n1 = int(line[1])
+            n2 = int(line[2])
+            n3 = int(line[3])
+        gt_box = [(n0 + n2) / 2, (n1 + n3) / 2, abs(n2 - n0), abs(n1 - n3)]    
+        print('gt_box is: ', gt_box)
+        
+        print("========================================")
+        print("the iou is: ", util.iou(gt_box, det_boxes[0][final_index]))
+        print('The det_class is: ', det_class[0][final_index])
+        print('The det_pred_conf is: ', det_pred_conf[0][final_index])
+        print('The det_pred_class_probs is: ', det_pred_class_probs[0][final_index])
+        print('the det_prob is: ', det_probs[0][final_index])
+        print('the predicted box is: ', det_boxes[0][final_index])
+        print("========================================")
 
         mc.PLOT_PROB_THRESH = 0.15
         keep_idx    = [idx for idx in range(len(final_probs)) \
@@ -239,14 +239,14 @@ def image_demo():
                 for idx, prob in zip(final_class, final_probs)],
             cdict=cls2clr,
         )
-        #_draw_box(im, [gt_box], ["gt_box"])
+        _draw_box(im, [gt_box], ["gt_box"])
 
         file_name = os.path.split(f)[1]
         out_file_name = os.path.join(FLAGS.out_dir, 'out_'+file_name)
-        #out_text_file_name = os.path.join(FLAGS.out_dir, 'notfool', file_name.replace('.png', '.txt')) ###
-        ## det_class, iou, pred_probs, pred_conf, pred_class_probs
-        #with open(out_text_file_name, 'w') as fw:
-        #    fw.write(str(det_class[0][final_index]) + ',' + str(util.iou(gt_box, det_boxes[0][final_index])) + ',' + str(det_probs[0][final_index]) +',' + str(det_pred_conf[0][final_index]) + ',' + str(det_pred_class_probs[0][final_index][0]) + ',' + str(det_pred_class_probs[0][final_index][1]) + ',' + str(det_pred_class_probs[0][final_index][2]) + ',' + str((n0 + n2) / 2) + ',' + str((n1 + n3) / 2))
+        out_text_file_name = os.path.join(FLAGS.out_dir, 'notfool', file_name.replace('.png', '.txt')) ###
+        # det_class, iou, pred_probs, pred_conf, pred_class_probs
+        with open(out_text_file_name, 'w') as fw:
+            fw.write(str(det_class[0][final_index]) + ',' + str(util.iou(gt_box, det_boxes[0][final_index])) + ',' + str(det_probs[0][final_index]) +',' + str(det_pred_conf[0][final_index]) + ',' + str(det_pred_class_probs[0][final_index][0]) + ',' + str(det_pred_class_probs[0][final_index][1]) + ',' + str(det_pred_class_probs[0][final_index][2]) + ',' + str((n0 + n2) / 2) + ',' + str((n1 + n3) / 2))
             #fw.write(str(gt_box))
             #fw.write(str(det_boxes[0][final_index]))
         cv2.imwrite(out_file_name, im)
