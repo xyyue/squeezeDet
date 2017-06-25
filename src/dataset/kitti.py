@@ -17,6 +17,8 @@ class kitti(imdb):
     self._data_root_path = data_path
     self._image_path = os.path.join(self._data_root_path, 'training', 'image_2')
     self._label_path = os.path.join(self._data_root_path, 'training', 'label_2')
+    self._image_path_add = os.path.join(self._data_root_path, 'squeezetest', 'pics') ###
+    self._label_path_add = os.path.join(self._data_root_path, 'squeezetest', 'new_labels') ###
     self._classes = self.mc.CLASS_NAMES
     self._class_to_idx = dict(zip(self.classes, xrange(self.num_classes)))
 
@@ -46,9 +48,15 @@ class kitti(imdb):
 
   def _image_path_at(self, idx):
     image_path = os.path.join(self._image_path, idx+'.png')
-    assert os.path.exists(image_path), \
-        'Image does not exist: {}'.format(image_path)
-    return image_path
+    image_path_add = os.path.join(self._image_path_add, idx+'.png')
+
+    assert os.path.exists(image_path) or os.path.exists(image_path_add), \
+        'Image does not exist: {}'.format(image_path_add)
+    if os.path.exists(image_path):
+      return image_path
+    else:
+      return image_path_add
+    #return image_path
 
   def _load_kitti_annotation(self):
     def _get_obj_level(obj):
@@ -67,8 +75,13 @@ class kitti(imdb):
     idx2annotation = {}
     for index in self._image_idx:
       filename = os.path.join(self._label_path, index+'.txt')
-      with open(filename, 'r') as f:
-        lines = f.readlines()
+      filename_add = os.path.join(self._label_path_add, index+'.txt') ###
+      if os.path.exists(filename):
+        with open(filename, 'r') as f:
+          lines = f.readlines()
+      else:
+        with open(filename_add, 'r') as f:
+          lines = f.readlines()
       f.close()
       bboxes = []
       for line in lines:
