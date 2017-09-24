@@ -46,8 +46,11 @@ class kitti(imdb):
 
   def _image_path_at(self, idx):
     image_path = os.path.join(self._image_path, idx+'.png')
+    if not os.path.exists(image_path):
+      image_path = idx
     assert os.path.exists(image_path), \
         'Image does not exist: {}'.format(image_path)
+    #print "PPPPPAAATTTHH is : " + image_path
     return image_path
 
   def _load_kitti_annotation(self):
@@ -67,6 +70,9 @@ class kitti(imdb):
     idx2annotation = {}
     for index in self._image_idx:
       filename = os.path.join(self._label_path, index+'.txt')
+      if not os.path.exists(filename):
+        head, tail = os.path.split(index)
+        filename = os.path.join(head.replace("images", "labels"),tail.replace("png", "txt"))
       with open(filename, 'r') as f:
         lines = f.readlines()
       f.close()
